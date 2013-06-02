@@ -405,10 +405,10 @@ is not sent to the IRC session.")
   "Handle the request."
   (string-match "\\([A-Z]+\\) \\([^ ]+\\)\\( :\\(.*\\)\\)*" request)
   (destructuring-bind
-        (command args text) (list
-                             (match-string-no-properties 1 request)
-                             (match-string-no-properties 2 request)
-                             (match-string-no-properties 4 request))
+      (command args text) (list
+                           (match-string-no-properties 1 request)
+                           (match-string-no-properties 2 request)
+                           (match-string-no-properties 4 request))
     (let ((username (plist-get authenticated :username))
           (command-sym (intern command)))
       (case command-sym
@@ -425,7 +425,13 @@ is not sent to the IRC session.")
                   username args text))
                (funcall
                 shoes-off-privmsg-plugin username args text process))
-             (rcirc-send-string session request))))))))
+             (let ((channel-name (concat args "@" (process-name session))))
+               (aif (get-buffer channel-name)
+                   (with-current-buffer it
+                     (goto-char (point-max))
+                     (insert text)
+                     (rcirc-send-input))
+                 (rcirc-send-string session request))))))))))
 
 (defun shoes-off/filter (process data)
   "Stuff from the bouncer's client."
