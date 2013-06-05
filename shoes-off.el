@@ -505,6 +505,10 @@ is not sent to the IRC session.")
                 (read-from-minibuffer
                  "Port: " nil nil nil
                  'shoes-off-start/port-history)))
+  ;; Setup the receive hook for the upstream IRC connection
+  (add-hook
+   'rcirc-receive-message-hooks
+   'shoes-off/receive-hook)
   (setq shoes-off/server-process
         (shoes-off/make-server (if (equal host "nil")
                                    nil
@@ -634,12 +638,6 @@ does NOT send the privmsg to the bouncer.")
             ;; If we didn't throw carry on call send-string
             (rcirc-send-string it text))))
     (error "whoops! something went wrong!!!")))
-
-;; Setup the receive hook for the upstream IRC connection
-(add-hook
- 'rcirc-receive-message-hooks
- 'shoes-off/receive-hook)
-
 
 ;;;###autoload
 (defun shoes-off-start-session (username &optional org-name)
