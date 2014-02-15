@@ -410,28 +410,27 @@ is not sent to the IRC session.")
                            (match-string-no-properties 2 request)
                            (match-string-no-properties 4 request))
     (let ((username (plist-get authenticated :username))
-          (command-sym (intern command)))
+          (command-sym (intern command))
+          (session (shoes-off/get-session process)))
       (case command-sym
         ('QUIT
          (message "shoes-off bouncer disconnect %s" username))
+        ('PRIVMSG
+         (catch :shoes-off-escape-privmsg
+           (when (functionp shoes-off-privmsg-plugin)
+             (when shoes-off/handle-request-privmsg-logging
+               (message
+                "shoes-off/handle-request %s %S /%s/"
+                username args text))
+             (funcall
+              shoes-off-privmsg-plugin username args text process))
+           (with-current-buffer (or (rcirc-get-buffer session args)
+                                    (rcirc-get-buffer-create session args))
+             (goto-char (point-max))
+             (insert text)
+             (rcirc-send-input)))))
         (t
-         (let ((session (shoes-off/get-session process)))
-           (catch :shoes-off-escape-privmsg
-             (when (and (eq command-sym 'PRIVMSG)
-                        (functionp shoes-off-privmsg-plugin))
-               (when shoes-off/handle-request-privmsg-logging
-                 (message
-                  "shoes-off/handle-request %s %S /%s/"
-                  username args text))
-               (funcall
-                shoes-off-privmsg-plugin username args text process))
-             (let ((channel-name (concat args "@" (process-name session))))
-               (aif (get-buffer channel-name)
-                   (with-current-buffer it
-                     (goto-char (point-max))
-                     (insert text)
-                     (rcirc-send-input))
-                 (rcirc-send-string session request))))))))))
+         (rcirc-send-string session request))))))
 
 (defun shoes-off/filter (process data)
   "Stuff from the bouncer's client."
