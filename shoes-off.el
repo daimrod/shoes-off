@@ -314,11 +314,11 @@ Unsuccessful auth makes no changes and returns `nil'."
 
 (defun shoes-off/send-to-channel (process channel data)
   "Send DATA to CHANNEL which belongs to IRC session PROCESS."
-  (let ((channel-name (concat channel "@" (process-name process))))
-    (with-current-buffer (get-buffer channel-name)
-      (goto-char (point-max))
-      (insert data)
-      (rcirc-send-input))))
+  (with-current-buffer (or (rcirc-get-buffer session args)
+                           (rcirc-get-buffer-create session args))
+    (goto-char (point-max))
+    (insert data)
+    (rcirc-send-input)))
 
 (defun shoes-off/get-auth-details (process)
   "Get the auth details from the process."
@@ -346,8 +346,8 @@ What's cached is the full text response of the command.")
          (hostname (shoes-off/server-name process))
          (welcome-cache (process-get session :shoes-off-welcome-cache)))
     (loop for cmd in shoes-off/cache-response-welcome-commands
-       do (shoes-off/send-command
-           process cmd (gethash cmd welcome-cache)))
+          do (shoes-off/send-command
+              process cmd (gethash cmd welcome-cache)))
     ;; then do lusers and motd
     ;;send-command to user's process and pull it back here
     (rcirc-send-string session "LUSERS")
@@ -424,11 +424,7 @@ is not sent to the IRC session.")
                 username args text))
              (funcall
               shoes-off-privmsg-plugin username args text process))
-           (with-current-buffer (or (rcirc-get-buffer session args)
-                                    (rcirc-get-buffer-create session args))
-             (goto-char (point-max))
-             (insert text)
-             (rcirc-send-input)))))
+           (shoes-off/send-to-channel session args text)))
         (t
          (rcirc-send-string session request))))))
 
