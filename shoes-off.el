@@ -314,8 +314,8 @@ Unsuccessful auth makes no changes and returns `nil'."
 
 (defun shoes-off/send-to-channel (process channel data)
   "Send DATA to CHANNEL which belongs to IRC session PROCESS."
-  (with-current-buffer (or (rcirc-get-buffer session args)
-                           (rcirc-get-buffer-create session args))
+  (with-current-buffer (or (rcirc-get-buffer session channel)
+                           (rcirc-get-buffer-create session channel))
     (goto-char (point-max))
     (insert data)
     (rcirc-send-input)))
