@@ -37,7 +37,7 @@ If nil, logs aren't kept."
     (huskie-bind-logname->filename
      shoes-off-log-name
      (format "%s/my-log" (expand-file-name shoes-off-log-dir)))
-    (add-hook 'rcirc-print-hooks 'shoes-off-write-log-hook)))
+    (add-hook 'rcirc-print-functions 'shoes-off-write-log-hook)))
 
 (defun shoes-off/hook-test (process)
   (and shoes-off-log-dir)

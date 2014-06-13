@@ -57,7 +57,7 @@ option in `shoes-off-config'."
       (shoes-off-log-init)
       ;; Else turn it off, just remove the print hook
       (remove-hook
-       'rcirc-print-hooks 'shoes-off-write-log-hook)))
+       'rcirc-print-functions 'shoes-off-write-log-hook)))
 
 (defcustom shoes-off-do-logging t
   "Whether to do logging of bounced sessions."
