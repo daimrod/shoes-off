@@ -502,7 +502,7 @@ is not sent to the IRC session.")
                  'shoes-off-start/port-history)))
   ;; Setup the receive hook for the upstream IRC connection
   (add-hook
-   'rcirc-receive-message-hooks
+   'rcirc-receive-message-functions
    'shoes-off/receive-hook)
   (setq shoes-off/server-process
         (shoes-off/make-server (if (equal host "nil")
